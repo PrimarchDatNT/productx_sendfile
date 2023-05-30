@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>File Transfer</title>
+    <link rel="icon" href="/image/favi_icon.png" type="image/x-icon"/>
+    <script src="/library/jquery.js"></script>
+    <script src="/library/jquery_form.js"></script>
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Open+Sans:400);*{font-family:"Google Sans",Helvetica,sans-serif;font-size:14px}html{background:#333333}body{margin:0;background:linear-gradient(0deg,rgb(51 51 51) 0,rgb(51 51 51) 100%)}article{width:750px;margin:0 auto}.space{width:100%;height:16px}.clear{clear:both}.col{width:100%;margin:0 auto;padding-bottom:40px}.logo .img{padding:16px 24px}.logo .img .az{float:left;width:140px;height:36px}.logo .img .download{float:right;width:120px;margin:0}.frame{color:#fff;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.center{color:#242427;position:relative;background:#fff;border-radius:4px;overflow:hidden;width:100%;margin:0 auto;box-shadow:0 2px 6px rgba(0,0,0,.1);margin-bottom:16px}.center .des{font-size:14px;text-align:center;margin:0 auto 40px auto}.center .inside{padding:16px}.inside.nothing{padding:40px;text-align:center}.inf{color:#646468}.title{font-size:16px;background:#f8f9fa;line-height:50px;height:50px;border-bottom:1px solid #efefef;text-align:left;padding:0 16px}.inside .list-content{height:auto;transition:.1s;overflow:hidden}.inside .list-content.on{height:0}.inside .colapse .arrow{transform:rotate(-180deg);transition:.1s}.inside .colapse.on .arrow{transform:rotate(0)}.inside .list-content .list{background:#fff;padding:16px;border:1px solid #efefef;border-radius:4px;margin-bottom:12px;transition:.1s}.inside .list-content .list:hover{background:#f8f9fa}.inside .list-content .list .name{margin:0;display:inline-block;float:left;width:64%;line-height:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.inside .list-content .list .action{width:30%;float:right;text-align:right}.inside .list-content .list .action a{font-size:11px;text-transform:uppercase;font-weight:600;line-height:24px;text-decoration:none;color:#0c71f8}.progress{width:30%;font-size:11px;float:right;text-align:center;border-radius:24px;padding:6px 0;text-transform:uppercase;font-weight:600;overflow:hidden}.p-uploaded{color:#fff;background:#0c71f8}.p-error{color:#fff;background:#f24c4c}.p-uploading{color:#fff;background:#dadee3;position:relative}.per{position:absolute;top:0;left:0;display:block;width:auto;height:100%;background:#126535;mix-blend-mode:color-burn}.p-waiting{color:#fff;background:#dadee3;position:relative}.dropzone{position:relative;z-index:1;display:table;table-layout:fixed;width:80px;height:80px;margin:30px auto;border:1px dashed #b6babf;border-radius:8px;text-align:center;overflow:hidden;background-size:#fff;transition:.1s}.dropzone:hover{background:#f8f9fa}.dropzone.is-dragover{border-color:#666;background:#f9fafb}.dropzone .content{width:80px;height:80px;display:table-cell;vertical-align:middle}.dropzone .upload{position:absolute;width:30px;height:auto;top:calc(50% - 15px);left:calc(50% - 15px)}.dropzone .filename{display:block;color:#242427;font-size:14px;line-height:18px}.dropzone .input{position:absolute;opacity:0;height:80px;width:80px;top:0;left:0;cursor:pointer}.upload-btn{width:200px;height:36px;background:#0c71f8;border-radius:40px;text-align:center;line-height:36px;font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;transition:all .2s;margin:0 auto 32px auto}.upload-btn:hover{background:#0b67e2}.button{text-align:center;padding:24px 0}.button a{font-size:12px;text-transform:uppercase;background:#0c71f8;padding:8px 24px;border-radius:24px;color:#fff;text-decoration:none;transition:.1s}.button a:hover{background:#1161cd}.policy{color:#646468;font-size:14px;text-align:center}.policy a{color:#0c71f8;font-size:14px}@-webkit-keyframes syncing{0%{transform:rotate(0)}10%{opacity:1}90%{opacity:1}100%{transform:rotate(360deg);opacity:0}}@keyframes syncing{0%{transform:rotate(0)}10%{opacity:1}90%{opacity:1}100%{transform:rotate(360deg);opacity:0}}@-webkit-keyframes done{from{opacity:0}to{opacity:1}}@keyframes done{from{opacity:0}to{opacity:1}}
+    </style>
+</head>
+<body>
+<div class="logo">
+    <div class="img"><!--<img src="image/logo.svg" class="az"/>--><a
+            href="https://play.google.com/store/apps/details?id=com.`azip.unrar.unzip.extractfile&hl=en_US&gl=US">
+        <!--<img src="image/ic_play_store.png" class="download"/>--></a>
+        <div class="clear"></div>
+    </div>
+</div>
+<article>
+    <div class="col">
+        <div class="frame wrap-col">
+            <div class="center">
+                <div class="title">File Transfer</div>
+                <div class="dropzone">
+                    <div class="content"><img src="image/ic_clound_upload.svg" class="upload"/><span
+                            class="filename"></span><input id="file" enctype="multipart/form-data" name="file"
+                                                           type="file" multiple class="input" onchange="updateList()"/>
+                    </div>
+                </div>
+                <p class="des">Choose or drop your file here</p></div>
+            <div class="center" id="table_upload"></div>
+            <div class="center" id="table_download"></div>
+            <div class="space"></div>
+            <p class="policy">By submitting data below, you are agreeing to our <a
+                    href="https://azip.tapon.app/terms-of-services/">Terms of Service</a> and <a
+                    href="https://azip.tapon.app/384/">Privacy Policy</a></p></div>
+    </div>
+    <div class="clear"></div>
+</article>
+<script>
+let list=[],isRunning=!1,currentPosition=0;function formatFileSize(o){const t=Math.floor(Math.log(o)/Math.log(1024));return 1*(o/Math.pow(1024,t)).toFixed(2)+" "+["B","KB","MB","GB","TB"][t]}function toggle(o){const t=document.getElementById(o.toString());$(t).next().toggleClass("on"),$(t).toggleClass("on")}window.onload=function(){reload()};
+
+    function updateList() {
+        console.log(list);
+        const input = document.getElementById("file");
+        const output = document.getElementById("table_upload");
+        const listUpload = document.getElementById("list_upload");
+
+        let totalSize = 0;
+        const files = input.files;
+
+        for (let i = 0; i < files.length; i++) {
+            list.push(files.item(i));
+        }
+
+        let children = listUpload === null || listUpload.innerHTML === null ? "" : listUpload.innerHTML;
+        children.replace('<div class="space"></div>', "");
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files.item(i);
+            children += '<div id="upload_item_' + (i + list.length - files.length) + '" class="list"><div class="name">' + file.name + '&nbsp;<span class="inf">(' + formatFileSize(file.size) + ')</span></div><div class="progress p-waiting">Waiting</div><div class="clear"></div></div>';
+        }
+
+        for (let i = 0; i < list.length; i++) {
+            totalSize += list[i].size;
+        }
+
+        output.innerHTML = '<div class="inside"><div id="11" onclick="toggle(11)" class="colapse">' + list.length + 'file(s) sent &nbsp;<span class="inf">(' + formatFileSize(totalSize) + ')</span> <img src="image/arrow.svg" class="arrow"></div><div id="list_upload" class="list-content"><div class="space"></div>' + children + " </div></div>";
+
+        if (!isRunning) {
+            isRunning = true;
+            uploadFile(currentPosition);
+        }
+    }
+
+    function uploadFile(index) {
+        const file = list[index];
+        const item = document.getElementById("upload_item_" + index);
+        const request = new XMLHttpRequest();
+
+        request.upload.addEventListener("progress", function (e) {
+            const fileSize = file.size;
+            let percent = Math.round((e.loaded / fileSize) * 100);
+            if (e.loaded < fileSize) {
+                item.innerHTML = '<div class="name">' + file.name + '&nbsp;<span class="inf">(' + formatFileSize(file.size) + ')</span></div><div class="progress p-uploading">Uploading<div class="per" style="width: ' + percent + '%"></div></div><div class="clear"></div>';
+            }
+        });
+
+        request.open("post", window.location.href + "upload");
+        request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        request.setRequestHeader('file_name', file.name);
+
+        request.onloadend = function () {
+            if (request.status === 200) {
+                item.innerHTML = '<div class="name">' + file.name + '&nbsp;<span class="inf">(' + formatFileSize(file.size) + ')</span></div><div class="progress p-uploaded">Uploaded</div><div class="clear"></div>';
+            } else {
+                item.innerHTML = '<div class="name">' + file.name + '&nbsp;<span class="inf">(' + formatFileSize(file.size) + ')</span></div><div class="progress p-error">Fail</div><div class="clear"></div>';
+            }
+
+            index++;
+
+            currentPosition = index;
+            if (index < list.length) {
+                sleepFor(250);
+                uploadFile(index);
+            } else {
+                isRunning = false;
+            }
+        };
+        request.send(file);
+    }
+
+    function sleepFor(sleepDuration) {
+        let now = new Date().getTime();
+        while (new Date().getTime() < now + sleepDuration) { /* do nothing */
+        }
+    }
+
+    function reload() {
+        fetch(window.location.href + "content_download", {
+            method: "get",
+            mode: "cors",
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                document.querySelector("#table_download").innerHTML = "";
+                let content = "";
+                if (data.length > 0) {
+                    let totalSize = 0;
+                    data.forEach((element) => {
+                        totalSize += element.downloadSize;
+                    });
+
+                    content += '<div class="inside"><div id="22" onclick="toggle(22)" class="colapse">' + data.length + ' file(s) received &nbsp;<span class="inf">(' + formatFileSize(totalSize) + ')</span><img src="image/arrow.svg" class="arrow"></div><div class="list-content"><div class="space"></div>';
+
+                    data.forEach((element) => {
+                        content += '<div class="list"> <div class="name">' + element.fileName + '<span class="inf"> (' + formatFileSize(element.downloadSize) + ')</span></div><div class="action"><a href="download/' + element.downloadId + '">Download</a></div><div class="clear"></div></div>';
+                    });
+
+                    content += "</div></div>";
+                } else {
+                    content = '<div class="inside nothing"><img src="image/nothing.svg"><p>Nothings to download. Please check again and reload...</p><div onclick="reload()" class="button"><a  onclick="reload()">reload</a></div></div>';
+                }
+                document.querySelector("#table_download").innerHTML = content;
+            });
+    }
+
+</script>
+</body>
+</html>
